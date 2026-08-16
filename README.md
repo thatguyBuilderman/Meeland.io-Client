@@ -14,3 +14,5 @@ An **desktop client for Meeland.io**.
 ## Download
 
 Check the **Releases** section for the latest version.
+
+Made by Wqx and Builderman.
