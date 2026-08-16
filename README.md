@@ -12,4 +12,4 @@
 ## Download
 Check the **Releases** section for the latest version.
 
-Made by Wqx and Builderman (Admin of Meeland)
+Made by Wqx and Builderman.
