@@ -1,7 +1,7 @@
-## Meeland Client
+# Meeland Client
 - An desktop client for Meeland.io.
 
-# Features
+## Features
 - Play Meeland.io on desktop
 - Built-in FPS counter
 - Discord Rich Presence
