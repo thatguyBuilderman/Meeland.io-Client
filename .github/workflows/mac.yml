@@ -1,0 +1,36 @@
+name: Build Mac
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Make Mac icon from .ico
+        continue-on-error: true
+        run: |
+          mkdir -p build/icon.iconset
+          sips -s format png assets/MeelandNew.ico --out build/base.png
+          for s in 16 32 128 256 512; do
+            sips -z $s $s build/base.png --out build/icon.iconset/icon_${s}x${s}.png
+            sips -z $((s*2)) $((s*2)) build/base.png --out build/icon.iconset/icon_${s}x${s}@2x.png
+          done
+          iconutil -c icns build/icon.iconset -o build/icon.icns
+
+      - run: npm ci
+
+      - run: npx electron-builder --mac --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-build
+          path: dist/*.dmg
+          if-no-files-found: error
