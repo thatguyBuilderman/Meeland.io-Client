@@ -1,4 +1,3 @@
-```yaml
 name: Build Meeland Client for macOS
 
 "on":
@@ -35,4 +34,3 @@ jobs:
             dist/*.dmg
             dist/*.zip
           if-no-files-found: error
-```
