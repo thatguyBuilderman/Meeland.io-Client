@@ -1,4 +1,4 @@
-
+```json
 {
   "name": "meeland-client",
   "productName": "Meeland Client",
@@ -48,15 +48,11 @@
       "target": "nsis",
       "icon": "assets/MeelandNew.ico"
     },
-   "mac": {
-  "icon": "assets/MeelandNew.icns",
-  "category": "public.app-category.games",
-  "artifactName": "Meeland-Client-macOS-${arch}-${version}.${ext}"
-},
-        {
-          "target": "zip",
-          "arch": ["x64", "arm64"]
-        }
+    "mac": {
+      "icon": "assets/MeelandNew.icns",
+      "target": [
+        "dmg",
+        "zip"
       ],
       "category": "public.app-category.games",
       "artifactName": "Meeland-Client-macOS-${arch}-${version}.${ext}"
@@ -89,3 +85,4 @@
     ]
   }
 }
+```
