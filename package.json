@@ -49,11 +49,9 @@
       "icon": "assets/MeelandNew.ico"
     },
     "mac": {
-      "icon": "assets/MeelandNew.icns",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
+  "icon": "assets/MeelandNew.icns",
+  "category": "public.app-category.games",
+  "artifactName": "Meeland-Client-macOS-${arch}-${version}.${ext}"
         },
         {
           "target": "zip",
