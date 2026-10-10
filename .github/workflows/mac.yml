@@ -1,41 +1,30 @@
+```yaml
 name: Build Meeland Client for macOS
 
 "on":
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build-macos:
-    name: Build macOS installers
     runs-on: macos-14
-
     strategy:
       fail-fast: false
       matrix:
         arch: [x64, arm64]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 22
 
-      - name: Verify project files
-        run: |
-          test -f package.json || (echo "ERROR: package.json missing" && exit 1)
-          test -f main.js || (echo "ERROR: main.js missing" && exit 1)
-          test -d assets || (echo "ERROR: assets folder missing" && exit 1)
-          test -f assets/MeelandNew.icns || (echo "ERROR: macOS icon missing" && exit 1)
-
       - name: Install dependencies
         run: npm install
 
-      - name: Build macOS installer
+      - name: Build macOS installers
         run: npx electron-builder --mac dmg zip --${{ matrix.arch }}
 
       - name: Upload installers
@@ -46,5 +35,4 @@ jobs:
             dist/*.dmg
             dist/*.zip
           if-no-files-found: error
-          retention-days: 14
 ```
