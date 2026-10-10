@@ -1,3 +1,4 @@
+
 {
   "name": "meeland-client",
   "productName": "Meeland Client",
@@ -23,15 +24,16 @@
   "build": {
     "appId": "com.meeland.client",
     "productName": "Meeland Client",
-    "icon": "assets/MeelandNew.ico",
-    "artifactName": "Meeland-Client-Setup-${version}.${ext}",
+    "artifactName": "Meeland-Client-${version}.${ext}",
     "directories": {
       "output": "dist"
     },
     "files": [
       "**/*",
-      "!dist",
-      "!data/**"
+      "!dist/**",
+      "!node_modules/**",
+      "!data/**",
+      "!.github/**"
     ],
     "extraFiles": [
       {
@@ -44,7 +46,37 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "assets/MeelandNew.icns"
+      "icon": "assets/MeelandNew.ico"
+    },
+    "mac": {
+      "icon": "assets/MeelandNew.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.games",
+      "artifactName": "Meeland-Client-macOS-${arch}-${version}.${ext}"
+    },
+    "dmg": {
+      "title": "Meeland Client",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
