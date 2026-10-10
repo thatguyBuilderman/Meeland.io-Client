@@ -1,4 +1,4 @@
-
+```yaml
 name: Build Meeland Client for macOS
 
 on:
@@ -51,3 +51,4 @@ jobs:
             dist/*.zip
           if-no-files-found: error
           retention-days: 14
+```
