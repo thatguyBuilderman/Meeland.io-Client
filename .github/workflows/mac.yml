@@ -1,36 +1,61 @@
-name: Build Mac
+
+name: Meeland Client macOS Build
 
 on:
   workflow_dispatch:
 
-jobs:
-  mac:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
+permissions:
+  contents: read
 
-      - uses: actions/setup-node@v4
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Make Mac icon from .ico
-        continue-on-error: true
+      - name: Install ImageMagick
+        run: brew install imagemagick
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate macOS icon
+        shell: bash
         run: |
-          mkdir -p build/icon.iconset
-          sips -s format png assets/MeelandNew.ico --out build/base.png
-          for s in 16 32 128 256 512; do
-            sips -z $s $s build/base.png --out build/icon.iconset/icon_${s}x${s}.png
-            sips -z $((s*2)) $((s*2)) build/base.png --out build/icon.iconset/icon_${s}x${s}@2x.png
-          done
-          iconutil -c icns build/icon.iconset -o build/icon.icns
+          set -euo pipefail
+          mkdir -p assets/MeelandNew.iconset
 
-      - run: npm ci
+          magick "assets/MeelandNew.ico[0]" -resize 16x16 assets/MeelandNew.iconset/icon_16x16.png
+          magick "assets/MeelandNew.ico[0]" -resize 32x32 assets/MeelandNew.iconset/icon_16x16@2x.png
+          magick "assets/MeelandNew.ico[0]" -resize 32x32 assets/MeelandNew.iconset/icon_32x32.png
+          magick "assets/MeelandNew.ico[0]" -resize 64x64 assets/MeelandNew.iconset/icon_32x32@2x.png
+          magick "assets/MeelandNew.ico[0]" -resize 128x128 assets/MeelandNew.iconset/icon_128x128.png
+          magick "assets/MeelandNew.ico[0]" -resize 256x256 assets/MeelandNew.iconset/icon_128x128@2x.png
+          magick "assets/MeelandNew.ico[0]" -resize 256x256 assets/MeelandNew.iconset/icon_256x256.png
+          magick "assets/MeelandNew.ico[0]" -resize 512x512 assets/MeelandNew.iconset/icon_256x256@2x.png
+          magick "assets/MeelandNew.ico[0]" -resize 512x512 assets/MeelandNew.iconset/icon_512x512.png
+          magick "assets/MeelandNew.ico[0]" -resize 1024x1024 assets/MeelandNew.iconset/icon_512x512@2x.png
 
-      - run: npx electron-builder --mac --publish never
+          iconutil -c icns assets/MeelandNew.iconset -o assets/MeelandNew.icns
 
-      - uses: actions/upload-artifact@v4
+      - name: Build Intel Mac installer
+        run: npx electron-builder --mac dmg --x64 --publish never
+
+      - name: Build Apple Silicon Mac installer
+        run: npx electron-builder --mac dmg --arm64 --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
         with:
-          name: mac-build
+          name: Meeland-Client-macOS-Installers
           path: dist/*.dmg
           if-no-files-found: error
+          retention-days: 14
