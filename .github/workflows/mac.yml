@@ -9,7 +9,8 @@ permissions:
 
 jobs:
   build-macos:
-    runs-on: macos-latest
+    name: Build macOS Installers
+    runs-on: macos-14
 
     steps:
       - name: Checkout repository
@@ -18,43 +19,147 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-              node-version: 22
+          node-version: 22
+
+      - name: Check project files
+        shell: bash
+        run: |
+          set -e
+
+          test -f package.json || {
+            echo "ERROR: package.json is missing."
+            exit 1
+          }
+
+          test -f main.js || {
+            echo "ERROR: main.js is missing."
+            exit 1
+          }
+
+          test -f assets/MeelandNew.ico || {
+            echo "ERROR: assets/MeelandNew.ico is missing."
+            exit 1
+          }
+
+          echo "Project files found."
 
       - name: Install ImageMagick
         run: brew install imagemagick
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          set -e
 
-      - name: Generate macOS icon
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "No package-lock.json found; using npm install."
+            npm install
+          fi
+
+      - name: Generate macOS application icon
         shell: bash
         run: |
           set -euo pipefail
+
           mkdir -p assets/MeelandNew.iconset
 
-          magick "assets/MeelandNew.ico[0]" -resize 16x16 assets/MeelandNew.iconset/icon_16x16.png
-          magick "assets/MeelandNew.ico[0]" -resize 32x32 assets/MeelandNew.iconset/icon_16x16@2x.png
-          magick "assets/MeelandNew.ico[0]" -resize 32x32 assets/MeelandNew.iconset/icon_32x32.png
-          magick "assets/MeelandNew.ico[0]" -resize 64x64 assets/MeelandNew.iconset/icon_32x32@2x.png
-          magick "assets/MeelandNew.ico[0]" -resize 128x128 assets/MeelandNew.iconset/icon_128x128.png
-          magick "assets/MeelandNew.ico[0]" -resize 256x256 assets/MeelandNew.iconset/icon_128x128@2x.png
-          magick "assets/MeelandNew.ico[0]" -resize 256x256 assets/MeelandNew.iconset/icon_256x256.png
-          magick "assets/MeelandNew.ico[0]" -resize 512x512 assets/MeelandNew.iconset/icon_256x256@2x.png
-          magick "assets/MeelandNew.ico[0]" -resize 512x512 assets/MeelandNew.iconset/icon_512x512.png
-          magick "assets/MeelandNew.ico[0]" -resize 1024x1024 assets/MeelandNew.iconset/icon_512x512@2x.png
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 16x16 \
+            assets/MeelandNew.iconset/icon_16x16.png
 
-          iconutil -c icns assets/MeelandNew.iconset -o assets/MeelandNew.icns
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 32x32 \
+            assets/MeelandNew.iconset/icon_16x16@2x.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 32x32 \
+            assets/MeelandNew.iconset/icon_32x32.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 64x64 \
+            assets/MeelandNew.iconset/icon_32x32@2x.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 128x128 \
+            assets/MeelandNew.iconset/icon_128x128.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 256x256 \
+            assets/MeelandNew.iconset/icon_128x128@2x.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 256x256 \
+            assets/MeelandNew.iconset/icon_256x256.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 512x512 \
+            assets/MeelandNew.iconset/icon_256x256@2x.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 512x512 \
+            assets/MeelandNew.iconset/icon_512x512.png
+
+          magick "assets/MeelandNew.ico[0]" \
+            -background none -alpha on -resize 1024x1024 \
+            assets/MeelandNew.iconset/icon_512x512@2x.png
+
+          iconutil -c icns \
+            assets/MeelandNew.iconset \
+            -o assets/MeelandNew.icns
+
+          test -s assets/MeelandNew.icns
 
       - name: Build Intel Mac installer
-        run: npx electron-builder --mac dmg --x64 --publish never
+        shell: bash
+        run: |
+          npx electron-builder \
+            --mac dmg \
+            --x64 \
+            --publish never
+
+      - name: Save Intel installer
+        shell: bash
+        run: |
+          mkdir -p mac-release/intel
+          find dist -maxdepth 1 -name "*.dmg" \
+            -exec cp {} mac-release/intel/ \;
+          test -n "$(find mac-release/intel -name '*.dmg' -print -quit)"
 
       - name: Build Apple Silicon Mac installer
-        run: npx electron-builder --mac dmg --arm64 --publish never
+        shell: bash
+        run: |
+          npx electron-builder \
+            --mac dmg \
+            --arm64 \
+            --publish never
 
-      - name: Upload installers
+      - name: Collect installers
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p mac-release/apple-silicon
+
+          find dist -maxdepth 1 -name "*.dmg" \
+            -exec cp {} mac-release/apple-silicon/ \;
+
+          mkdir -p mac-release/final
+
+          find mac-release/intel -name "*.dmg" \
+            -exec cp {} mac-release/final/ \;
+
+          find mac-release/apple-silicon -name "*.dmg" \
+            -exec cp {} mac-release/final/ \;
+
+          echo "Generated Mac installers:"
+          ls -lh mac-release/final/
+
+      - name: Upload Mac installers
         uses: actions/upload-artifact@v4
         with:
           name: Meeland-Client-macOS-Installers
-          path: dist/*.dmg
+          path: mac-release/final/*.dmg
           if-no-files-found: error
           retention-days: 14
