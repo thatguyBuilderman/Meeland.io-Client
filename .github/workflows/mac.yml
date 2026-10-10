@@ -1,3 +1,4 @@
+```yaml
 name: Build Meeland Client for macOS
 
 on:
@@ -27,19 +28,16 @@ jobs:
 
       - name: Verify project files
         run: |
-          test -f package.json || (echo "ERROR: package.json is missing from the repository root" && exit 1)
-          test -f main.js || (echo "ERROR: main.js is missing from the repository root" && exit 1)
-          test -d assets || (echo "ERROR: assets folder is missing" && exit 1)
-          test -f assets/MeelandNew.icns || (echo "ERROR: assets/MeelandNew.icns is missing" && exit 1)
-          echo "Project files verified."
+          test -f package.json || (echo "ERROR: package.json missing" && exit 1)
+          test -f main.js || (echo "ERROR: main.js missing" && exit 1)
+          test -d assets || (echo "ERROR: assets folder missing" && exit 1)
+          test -f assets/MeelandNew.icns || (echo "ERROR: macOS icon missing" && exit 1)
 
       - name: Install dependencies
         run: npm install
 
       - name: Build macOS installer
         run: npx electron-builder --mac dmg zip --${{ matrix.arch }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
