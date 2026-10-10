@@ -38,7 +38,7 @@ jobs:
         run: npm install
 
       - name: Build macOS installer
-        run: npx electron-builder --mac dmg zip --${{ matrix.arch }} --config.mac.icon=assets/MeelandNew.icns --config.mac.icon=assets/MeelandNew.icns
+        run: npx electron-builder --mac dmg zip --${{ matrix.arch }} --config.mac.icon=assets/MeelandNew.icns
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
