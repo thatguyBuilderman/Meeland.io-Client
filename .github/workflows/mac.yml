@@ -1,7 +1,6 @@
-```yaml
 name: Build Meeland Client for macOS
 
-on:
+"on":
   workflow_dispatch:
 
 permissions:
